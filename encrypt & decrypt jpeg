@@ -1,0 +1,55 @@
+from PIL import Image
+import random
+
+def load_image(image_path):
+    return Image.open(image_path)
+
+def swap_pixels(image, key):
+    pixels = list(image.getdata())  
+    random.seed(key)  
+    width, height = image.size
+    
+    for _ in range(len(pixels) // 10): 
+        i = random.randint(0, len(pixels) - 1)
+        j = random.randint(0, len(pixels) - 1)
+        pixels[i], pixels[j] = pixels[j], pixels[i]
+    
+    image.putdata(pixels)  
+    return image
+
+def add_to_pixels(image, constant):
+    pixels = list(image.getdata())  # Get the pixel data
+    
+    new_pixels = [(min(255, p[0] + constant), min(255, p[1] + constant), min(255, p[2] + constant)) for p in pixels]
+    
+    image.putdata(new_pixels)  
+    return image
+
+
+def encrypt_image(image_path, output_path, key, constant):
+    image = load_image(image_path).convert('RGB')  
+    image = swap_pixels(image, key)  
+    image = add_to_pixels(image, constant) 
+    image.save(output_path)
+    print(f"Encrypted image saved at {output_path}")
+
+
+def decrypt_image(image_path, output_path, key, constant):
+    image = load_image(image_path).convert('RGB')
+    image = add_to_pixels(image, -constant)  
+    image = swap_pixels(image, key) 
+    image.save(output_path)
+    print(f"Decrypted image saved at {output_path}")
+
+if _name_ == "__main__":
+    key = 1234 
+    constant = 50  
+    image_path = "    "  
+    encrypted_image_path = "encrypted_image.jpg"
+    decrypted_image_path = "decrypted_image.jpg"
+    
+    # Encrypt the image
+    encrypt_image(image_path, encrypted_image_path, key, constant)
+    
+    # Decrypt the image
+    decrypt_image(encrypted_image_path, decrypted_image_path, key, constant)
